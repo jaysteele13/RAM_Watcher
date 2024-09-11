@@ -4,7 +4,8 @@
 ## Overview
 **RAM_Watcher** is a minimalist, yet powerful terminal tool designed to keep an eye on your system's memory consumption in real-time. Whether you're a developer, sysadmin, or just someone who wants to keep their system running smoothly, **RAM_Watcher** provides a simple and efficient way to visualize RAM usage directly from your terminal.
 
-![RAM_Watcher Screenshot](assets/ram_watcher_screenshot.png)
+![image](https://github.com/user-attachments/assets/bbcf3772-31db-4f1c-9b4a-27854da9c721)
+
 
 ## 🚀 Features
 - **Real-Time Monitoring**: Observe memory consumption in real-time with refresh intervals adjustable to your preference.
@@ -24,14 +25,19 @@ cd RAM_Watcher
 ## There will be 2 Versions
 ```diff
 - RAM_Watcher_V1
-Just uses terminal functions to use as little RAM, GRAM and CPU porcessing power and Storage. This is a simple terminal interface, primarily just used for Alerting when an applications memory goes over your set threshold.
+Just uses terminal functions to use as little RAM, GRAM and CPU porcessing
+power and Storage. This is a simple terminal interface, primarily just used
+for Alerting when an applications memory goes over your set threshold.
+
+# Screenshots
+
+
+- RAM_Watcher_V2
+Takes everything V1 has to offer and uses `Curses` A terminal GUI to amplify
+the visuals of the application. V2 was more for my enjoyment to mess around on.
+That to say it only takes up 10mb more RAM than V1, for better visuals.
+
+# Screenshots
+
+
 ```
-
-
-#### Screenshots
-
-### RAM_Watcher_V2
-
-Takes everything V1 has to offer and uses `Curses` A terminal GUI to amplify the visuals of the application. V" was more for my enjoyment to mess around on. That to say it only takes up 10mb more RAM than V1, for better visuals.
-
-#### Screenshots
