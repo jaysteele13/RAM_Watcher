@@ -3,7 +3,7 @@
 
 a = Analysis(
     ['home.py'],
-    pathex=['.'],
+    pathex=[],
     binaries=[],
     datas=[],
     hiddenimports=['plyer.platforms', 'plyer.facades.monitor', 'plyer.platforms.win.notification'],
@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['C:\\Users\\jayst\\Documents\\Code\\Jay_Having_fun\\RAM_Watcher\\braveIcon.ico']
+    icon=['braveIcon.ico'],
 )

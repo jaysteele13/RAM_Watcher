@@ -14,16 +14,18 @@ if __name__ == "__main__":
 
     try:
         set_default_values()
+        # Run Monitor Threads
+        monitor_threads()
         # start up screen one timers
-        # startup()
+        startup()
         # coding grace period transition
         #time.sleep(1)
 
+        
         # Show the help screen
         display_screen(help)
        
-        # Run Monitor Threads
-        monitor_threads()
+        
         # Run Refresh Threads
         # refresh_threads()
         

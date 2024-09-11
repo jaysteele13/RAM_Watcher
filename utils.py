@@ -20,7 +20,7 @@ timeout_duration = 1200
 refresh_rate = 15
 
 # STOP DEBOUNCING for FLAG
-last_capslock_event_time = 0
+last_space_event_time = 0
 debounce_interval = 0.5  # 500 milliseconds
 def set_default_values():
     # Defaults (dk if these are necessary)
@@ -32,6 +32,7 @@ def set_default_values():
 
 
 #instead have a function that just maps this
+
 
 def dictToInt(memory):
     memory_usage_str = str(memory)
@@ -100,7 +101,7 @@ def display_screen(help = False, startup=False):
             else:
                 print(create_separator(homeTitle, *homeLines))
 
-            print(f"{GREEN}CAPS LOCK{RESET} for help / refresh / clear\n{RED}e{RESET} to quit gracefully...")
+            print(f"{GREEN}SPACE{RESET} for help / refresh / clear\n{RED}e{RESET} to quit gracefully...")
 
         
 def is_terminal_focused():
@@ -111,7 +112,7 @@ def is_terminal_focused():
     window_title = ctypes.create_string_buffer(512)
     ctypes.windll.user32.GetWindowTextA(active_window_handle, window_title, 512)
 
-    terminal_titles = [b"Python", b"cmd", b"Terminal", b"Windows PowerShell", b"RAM_Watcher"]
+    terminal_titles = [b"RAM_Watcher"]
     return any(title in window_title.value for title in terminal_titles)
 
 
@@ -124,12 +125,12 @@ def start_script(script_name):
     subprocess.Popen(["python", script_path])
 
 
-def handle_capslock_event(e):
+def handle_space_event(e):
     global help
-    global last_capslock_event_time
+    global last_space_event_time
 
     current_time = time.time()
-    if (current_time - last_capslock_event_time) < debounce_interval:
+    if (current_time - last_space_event_time) < debounce_interval:
         # Ignore this event as it is within the debounce interval
         return
 
@@ -139,7 +140,7 @@ def handle_capslock_event(e):
         
 
     # Update the last processed time
-    last_capslock_event_time = current_time
+    last_space_event_time = current_time
 
 
 def change_number_validation(number, setter):
@@ -233,8 +234,8 @@ def monitor_threads():
 def run_threads():
    
     
-     # Start listening for CAPS LOCK key event
-    keyboard.on_press_key("caps lock", handle_capslock_event)
+     # Start listening for SPACE key event
+    keyboard.on_press_key("space", handle_space_event)
 
     
 
@@ -249,7 +250,7 @@ def run_threads():
 def refresh_threads():
     display_thread = threading.Thread(target=periodic_display_screen, daemon=True)
     display_thread.start()
-
+     
 
 
 def startup():
