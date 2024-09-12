@@ -65,7 +65,7 @@ def monitor_memory(app_name=APPLICATION_NAME):
     last_notification_time = datetime.now() - timedelta(seconds=get_interval())
 
 
-    while watcherToggle:
+    while get_watcher():
         total_memory = 0
 
         # Calculate memory usage
@@ -81,7 +81,7 @@ def monitor_memory(app_name=APPLICATION_NAME):
             memory_usage_data[app_name] = round(total_memory)
         
         # Check if total memory usage exceeds the threshold
-        if notificationToggle and (total_memory)> threshold:
+        if get_notification() and (total_memory)> threshold:
             current_time = datetime.now()
             
             with notification_lock:
