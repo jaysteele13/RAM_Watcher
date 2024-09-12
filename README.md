@@ -22,7 +22,7 @@ git clone git@github.com:jaysteele13/RAM_Watcher.git
 cd RAM_Watcher
 ```
 
-## There will be 2 Versions
+## There will be 2 Versions on Separate refined `branches`
 ```diff
 - RAM_Watcher_V1
 Just uses terminal functions to use as little RAM, GRAM and CPU porcessing
