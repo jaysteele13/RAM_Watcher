@@ -71,8 +71,6 @@ def periodic_display_screen():
 
 def display_screen(help = False, startup=False):
         clear_screen()
-        # Refresh in
-        # await check_for_changes()
         with memory_lock: 
             homeTitle = "Home"
             homeLines = [
@@ -102,7 +100,6 @@ def display_screen(help = False, startup=False):
                 print(create_separator(homeTitle, *homeLines))
 
             print(f"{GREEN}SHIFT{RESET} for help / refresh / clear\n{RED}e{RESET} to quit gracefully...")
-
         
 def is_terminal_focused():
     # Get the current active window handle
@@ -114,16 +111,6 @@ def is_terminal_focused():
 
     terminal_titles = [b"RAM_Watcher"]
     return any(title in window_title.value for title in terminal_titles)
-
-
-
-# Function to start a script
-def start_script(script_name):
-    script_path = os.path.join(os.getcwd(), script_name)
-    
-    # Start the new script
-    subprocess.Popen(["python", script_path])
-
 
 def handle_shift_event(e):
     global help
@@ -175,6 +162,12 @@ def change_number_validation(number, setter):
                 break
 
 
+def handle_language_refresh_rate_change(refresh):
+    if refresh == 10:
+        return "Standard Refresh rate is 10 seconds , do you really wanna change that (this could displace the notification timer)?"
+    else:
+        return f"Modified Refresh Rate is {refresh}, wanna change this again?"
+
 def handle_commands():
     handling = True
     while handling:
@@ -184,12 +177,9 @@ def handle_commands():
             print(f"Exiting the program {GREEN}GRACEFULLY{RESET}.")
             os._exit(0)  # Exiting the entire program no MATTER WHAT, kills all threads
         elif command.lower() == "ur a bitch":
-            print("Standard Refresh rate is 10 seconds, do you really wanna change that (this could displace the notification timer)? y/n")
+            print(f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n")
             response = input("")
             if response.lower() == 'y':
-                print("you sure there bud? aye mate would ye fuck up/n")
-                response = input("")
-                if response.lower() == 'aye mate would ye fuck up':
                     print("right then, select a time in seconds to refresh RAM here")
                     number = input("")
                     change_number_validation(number, set_refresh_rate)
@@ -219,14 +209,10 @@ def handle_commands():
             handling = True
         time.sleep(0.5)
             
-
-    # Show the help screen something GOES WRONG AFTER THIS command. Do i run display_screen twice
     display_screen()
 
 
 def monitor_threads():
-    # monitor threads
-
     monitor_thread = threading.Thread(target=monitor_memory, args=(APPLICATION_NAME,), daemon=True)
     monitor_thread.start()
 
@@ -235,8 +221,6 @@ def run_threads():
     
      # Start listening for shift key event
     keyboard.on_press_key("shift", handle_shift_event)
-
-    
 
     # command threads
     command_thread = threading.Thread(target=handle_commands, daemon=True)
@@ -250,8 +234,6 @@ def refresh_threads():
     display_thread = threading.Thread(target=periodic_display_screen, daemon=True)
     display_thread.start()
      
-
-
 def startup():
     # On start up do this
     clear_screen()
