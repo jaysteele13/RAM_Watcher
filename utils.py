@@ -20,7 +20,7 @@ timeout_duration = 1200
 refresh_rate = 15
 
 # STOP DEBOUNCING for FLAG
-last_space_event_time = 0
+last_shift_event_time = 0
 debounce_interval = 0.5  # 500 milliseconds
 def set_default_values():
     # Defaults (dk if these are necessary)
@@ -101,7 +101,7 @@ def display_screen(help = False, startup=False):
             else:
                 print(create_separator(homeTitle, *homeLines))
 
-            print(f"{GREEN}SPACE{RESET} for help / refresh / clear\n{RED}e{RESET} to quit gracefully...")
+            print(f"{GREEN}SHIFT{RESET} for help / refresh / clear\n{RED}e{RESET} to quit gracefully...")
 
         
 def is_terminal_focused():
@@ -125,12 +125,12 @@ def start_script(script_name):
     subprocess.Popen(["python", script_path])
 
 
-def handle_space_event(e):
+def handle_shift_event(e):
     global help
-    global last_space_event_time
+    global last_shift_event_time
 
     current_time = time.time()
-    if (current_time - last_space_event_time) < debounce_interval:
+    if (current_time - last_shift_event_time) < debounce_interval:
         # Ignore this event as it is within the debounce interval
         return
 
@@ -140,7 +140,7 @@ def handle_space_event(e):
         
 
     # Update the last processed time
-    last_space_event_time = current_time
+    last_shift_event_time = current_time
 
 
 def change_number_validation(number, setter):
@@ -232,10 +232,9 @@ def monitor_threads():
 
 # Function to run both threads
 def run_threads():
-   
     
-     # Start listening for SPACE key event
-    keyboard.on_press_key("space", handle_space_event)
+     # Start listening for shift key event
+    keyboard.on_press_key("shift", handle_shift_event)
 
     
 

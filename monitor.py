@@ -60,7 +60,7 @@ memory_lock = threading.Lock()
 notification_lock = threading.Lock()
 
 # default 10 second refresh
-def monitor_memory(app_name=APPLICATION_NAME, check_interval=get_refresh_rate()):
+def monitor_memory(app_name=APPLICATION_NAME):
     global memory_usage_data
     last_notification_time = datetime.now() - timedelta(seconds=get_interval())
 
@@ -100,7 +100,4 @@ def monitor_memory(app_name=APPLICATION_NAME, check_interval=get_refresh_rate())
         # Wait for the next check
         time.sleep(get_refresh_rate())
 
-"""monitor_thread = threading.Thread(target=monitor_memory, args=(APPLICATION_NAME, get_interval()), daemon=True)
-monitor_thread.start()"""
-    
 
