@@ -6,7 +6,7 @@ import re
 from art import *
 from monitor import *
 import ctypes
-from constants import APPLICATION_NAME, RED, RESET, GREEN
+from constants import *
 
 
 
@@ -168,36 +168,36 @@ def handle_language_refresh_rate_change(refresh):
     else:
         return f"Modified Refresh Rate is {refresh}, wanna change this again?"
 
-def handle_commands():
+def handle_commands(command_type: Command_Menu):
     handling = True
     while handling:
         handling = False
         command = input("")
-        if command.lower() == "e":
+        if command_type == Command_Menu.EXIT:
             print(f"Exiting the program {GREEN}GRACEFULLY{RESET}.")
             os._exit(0)  # Exiting the entire program no MATTER WHAT, kills all threads
-        elif command.lower() == "ur a bitch":
+        elif command_type == Command_Menu.RAM_USED:
             print(f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n")
             response = input("")
             if response.lower() == 'y':
                     print("right then, select a time in seconds to refresh RAM here")
                     number = input("")
                     change_number_validation(number, set_refresh_rate)
-        elif command.lower() == "o":
+        elif command_type == Command_Menu.RAM_WATCHER:
             print("Toggling RAM_Watcher")
             set_watcher(not get_watcher())
-        elif command.lower() == "t":
+        elif command_type == Command_Menu.THRESHOLD:
             print(f"What would you like to change the {GREEN}threshold{RESET} ({get_threshold()}) to: ")
             number = input("")
             change_number_validation(number, set_threshold)
-        elif command.lower() == "a":
+        elif command_type == Command_Menu.APPLICATION:
             print("This doesn't change. You a bitch for thinking I'd put in this much effort")
-        elif command.lower() == "n":
+        elif command_type == Command_Menu.NOTIFICATIONS:
              print("(Don't see why you would turn this off as it's the whole point of this app but fuck it)")
              time.sleep(2)
              print("Toggling Notification")
              set_notification(not get_notification())
-        elif command.lower() == "ns":
+        elif command_type == Command_Menu.NOTIFICATIONS_TIMER:
             print(f"What would you like to change the {GREEN}timer{RESET} ({display_timer(get_interval())}) to (min): ")
             number = input("")
             change_number_validation(number, set_interval)
@@ -209,7 +209,7 @@ def handle_commands():
             handling = True
         time.sleep(0.5)
             
-    display_screen()
+    # Show main
 
 
 def monitor_threads():
