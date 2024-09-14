@@ -1,5 +1,4 @@
 import keyboard
-import subprocess
 import threading
 import os
 import re
@@ -7,6 +6,9 @@ from art import *
 from monitor import *
 import ctypes
 from constants import *
+import curses
+import sys
+
 
 
 
@@ -32,7 +34,11 @@ def set_default_values():
 
 
 #instead have a function that just maps this
-
+def map_row_to_command(row: int) -> Command_Menu:
+    try:
+        return Command_Menu(row)  # Convert integer to corresponding enum
+    except ValueError:
+        raise ValueError("Invalid row number, cannot map to Command_Menu")  # Handle invalid rows
 
 def dictToInt(memory):
     memory_usage_str = str(memory)
@@ -167,49 +173,85 @@ def handle_language_refresh_rate_change(refresh):
         return "Standard Refresh rate is 10 seconds , do you really wanna change that (this could displace the notification timer)?"
     else:
         return f"Modified Refresh Rate is {refresh}, wanna change this again?"
+    
 
-def handle_commands(command_type: Command_Menu):
+
+def print_center(stdscr, text):
+    stdscr.clear()
+    h, w = stdscr.getmaxyx()
+    x = w // 2 - len(text) // 2
+    y = h // 2
+    stdscr.addstr(y, x, text)
+    stdscr.refresh()
+
+def handle_commands(stdscr, command_type: Command_Menu):
     handling = True
     while handling:
         handling = False
-        command = input("")
+
         if command_type == Command_Menu.EXIT:
-            print(f"Exiting the program {GREEN}GRACEFULLY{RESET}.")
-            os._exit(0)  # Exiting the entire program no MATTER WHAT, kills all threads
+            print_center(stdscr, f"Exiting the program {GREEN}GRACEFULLY{RESET}.\n")
+            stdscr.refresh()
+            time.sleep(1)
+            curses.endwin()  # Ensure curses cleanup
+            handling = False
+            sys.exit(0)  # Use sys.exit() to terminate properly
+
         elif command_type == Command_Menu.RAM_USED:
-            print(f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n")
-            response = input("")
-            if response.lower() == 'y':
-                    print("right then, select a time in seconds to refresh RAM here")
-                    number = input("")
-                    change_number_validation(number, set_refresh_rate)
+           
+            print_center(stdscr, f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n\n")
+            # stdscr.addstr(f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n\n")
+            stdscr.refresh()
+            response = stdscr.getstr().decode("utf-8").lower().strip()
+            if response == 'y':
+                print_center(stdscr,"Right then, select a time in seconds to refresh RAM here: ")
+                stdscr.refresh()
+                number = stdscr.getstr().decode("utf-8").strip()
+                change_number_validation(number, set_refresh_rate)
+
         elif command_type == Command_Menu.RAM_WATCHER:
-            print("Toggling RAM_Watcher")
+            print_center(stdscr, "Toggling RAM_Watcher\n")
+            stdscr.refresh()
             set_watcher(not get_watcher())
+
+
         elif command_type == Command_Menu.THRESHOLD:
-            print(f"What would you like to change the {GREEN}threshold{RESET} ({get_threshold()}) to: ")
-            number = input("")
+            stdscr.addstr(f"What would you like to change the {GREEN}threshold{RESET} ({get_threshold()}) to: ")
+            stdscr.refresh()
+            number = stdscr.getstr().decode("utf-8").strip()
             change_number_validation(number, set_threshold)
+
         elif command_type == Command_Menu.APPLICATION:
-            print("This doesn't change. You a bitch for thinking I'd put in this much effort")
+            stdscr.addstr("This doesn't change. You a bitch for thinking I'd put in this much effort\n")
+            stdscr.refresh()
+
         elif command_type == Command_Menu.NOTIFICATIONS:
-             print("(Don't see why you would turn this off as it's the whole point of this app but fuck it)")
-             time.sleep(2)
-             print("Toggling Notification")
-             set_notification(not get_notification())
+            stdscr.addstr("(Don't see why you would turn this off as it's the whole point of this app but fuck it)\n")
+            stdscr.refresh()
+            time.sleep(2)
+            stdscr.addstr("Toggling Notification\n")
+            stdscr.refresh()
+            set_notification(not get_notification())
+
         elif command_type == Command_Menu.NOTIFICATIONS_TIMER:
-            print(f"What would you like to change the {GREEN}timer{RESET} ({display_timer(get_interval())}) to (min): ")
-            number = input("")
+            stdscr.addstr(f"What would you like to change the {GREEN}timer{RESET} ({display_timer(get_interval())}) to (min): ")
+            stdscr.refresh()
+            number = stdscr.getstr().decode("utf-8").strip()
             change_number_validation(number, set_interval)
-        elif command.lower() == "":
-            print("That's an empty command sir!")
+
+        elif command == "":
+            stdscr.addstr("That's an empty command sir!\n")
             handling = True
+
         else:
-            print(f"Unknown command: {command}")
+            stdscr.addstr(f"Unknown command: {command}\n")
             handling = True
+
+        stdscr.refresh()
         time.sleep(0.5)
+    
             
-    # Show main
+    # Show main some way curses.wrapper(main)
 
 
 def monitor_threads():

@@ -1,5 +1,4 @@
 import curses
-import os
 from constants import *
 from monitor import *
 from utils import *
@@ -33,15 +32,6 @@ def print_menu(stdscr, selected_row_idx):
 	stdscr.refresh()
 
 
-def print_center(stdscr, text):
-	stdscr.clear()
-	h, w = stdscr.getmaxyx()
-	x = w//2 - len(text)//2
-	y = h//2
-	stdscr.addstr(y, x, text)
-	stdscr.refresh()
-
-
 def main(stdscr):
 	# turn off cursor blinking
 	curses.curs_set(0)
@@ -55,6 +45,8 @@ def main(stdscr):
 	# print the menu
 	print_menu(stdscr, current_row)
 
+	
+	# logic
 	while 1:
 		key = stdscr.getch()
 
@@ -64,18 +56,22 @@ def main(stdscr):
 			current_row += 1
 		elif key == curses.KEY_ENTER or key in [10, 13]:
 			# here we will handle the commands
-			print_center(stdscr, "Type: You selected '{}'".format(menu_options[current_row]))
-		
-			stdscr.getch() 
 			# if user selected last row, exit the program
 			if current_row == len(menu_options)-1:
 				break
+			
+			
+			handle_commands(stdscr, map_row_to_command(current_row)) # this is broke -> fix please x
+			stdscr.getch() 
+			
 
 		print_menu(stdscr, current_row)
 		
 if __name__ == "__main__":
+    set_default_values()  # Fixed indentation
     try:
         curses.wrapper(main)
     except KeyboardInterrupt:
-            print(f"{GREEN}Salutations{RESET}")
-            os._exit(0)
+        print(f"{RED}Salutations{RESET}")
+        sys.exit()
+
