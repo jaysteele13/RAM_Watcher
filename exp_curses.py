@@ -21,6 +21,7 @@ def update_menu(ram = {"loading data"}):
 
 
 def print_menu(stdscr, selected_row_idx, menu_options):
+	allow_text(False)
 	stdscr.clear()
 	h, w = stdscr.getmaxyx()
 	for idx, row in enumerate(menu_options):
@@ -37,6 +38,9 @@ def print_menu(stdscr, selected_row_idx, menu_options):
 
 def main(stdscr):
 	# turn off cursor blinking
+	stdscr = curses.initscr()  # Initialize the screen
+	curses.echo()  # Enable echoing of inputs
+
 	queue = Queue()  # Queue for communication between threads
 	curses.curs_set(0)
 

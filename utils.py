@@ -74,6 +74,13 @@ def periodic_display_screen():
             display_screen(help)  # Refresh display
         time.sleep(get_refresh_rate())  # Sleep for the refresh rate (e.g., 15 seconds)
 
+def allow_text(allow = True):
+    if allow:
+        curses.echo()  # Enable echoing of inputs
+        curses.curs_set(1)
+    else:
+        curses.curs_set(0)
+        curses.noecho()
 
 def display_screen(help = False, startup=False):
         clear_screen()
@@ -141,7 +148,7 @@ def change_number_validation(stdscr, number, setter):
 
     while True:
         if number == "":
-            print_center(stdscr, 'Empty response, would you still like to set a value? (y/n)')
+            print_center(stdscr, 'Empty response, would you still like to set a value? (y/n): ')
             emptyResponse = stdscr.getstr().decode("utf-8").lower().strip()
             if emptyResponse == 'y':
                 emptyResponse = stdscr.getstr().decode("utf-8").lower().strip()
@@ -150,6 +157,7 @@ def change_number_validation(stdscr, number, setter):
             elif emptyResponse == 'n':
                 break
             else:
+                allow_text(False)
                 print_center(stdscr, "I'm done with you.")
                 break
         else:
@@ -212,6 +220,7 @@ def print_center(stdscr, text):
 def handle_commands(stdscr, command_type: Command_Menu):
     handling = True
     while handling:
+        allow_text()
         handling = False
 
         if command_type == Command_Menu.EXIT:
@@ -224,7 +233,7 @@ def handle_commands(stdscr, command_type: Command_Menu):
 
         elif command_type == Command_Menu.RAM_USED:
            
-            print_center(stdscr, f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n\n")
+            print_center(stdscr, f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n: ")
             stdscr.refresh()
             response = stdscr.getstr().decode("utf-8").lower().strip()
             if response == 'y':
@@ -232,12 +241,15 @@ def handle_commands(stdscr, command_type: Command_Menu):
                 stdscr.refresh()
                 number = stdscr.getstr().decode("utf-8").strip()
                 change_number_validation(stdscr, number, set_refresh_rate)
+            else:
+                allow_text(False)
+                break
 
         elif command_type == Command_Menu.RAM_WATCHER:
+            allow_text(False)
             print_center(stdscr, "Toggling RAM_Watcher\n")
             stdscr.refresh()
             set_watcher(not get_watcher())
-
 
         elif command_type == Command_Menu.THRESHOLD:
             print_center(stdscr, f"What would you like to change the threshold ({get_threshold()}) to: ")
@@ -246,11 +258,13 @@ def handle_commands(stdscr, command_type: Command_Menu):
             change_number_validation(stdscr, number, set_threshold)
 
         elif command_type == Command_Menu.APPLICATION:
+            allow_text(False)
             print_center(stdscr, "This doesn't change. Your a bitch for thinking I'd put in this much effort\n")
             time.sleep(2)
             stdscr.refresh()
 
         elif command_type == Command_Menu.NOTIFICATIONS:
+            allow_text(False)
             print_center(stdscr, "(Don't see why you would turn this off as it's the whole point of this app but fuck it)\n")
             stdscr.refresh()
             time.sleep(1.5)
