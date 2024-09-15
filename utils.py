@@ -26,7 +26,7 @@ last_shift_event_time = 0
 debounce_interval = 0.5  # 500 milliseconds
 def set_default_values():
     # Defaults (dk if these are necessary)
-    set_refresh_rate(10)
+    set_refresh_rate(1)
     set_threshold(1250)
     set_interval(600) # 10 mins default
     set_watcher(True)
@@ -136,21 +136,21 @@ def handle_shift_event(e):
     last_shift_event_time = current_time
 
 
-def change_number_validation(number, setter):
+def change_number_validation(stdscr, number, setter):
     # Check for empty input
 
     while True:
         if number == "":
-            print('Empty response, would you still like to set a value? (y/n)')
-            emptyResponse = input("")
+            print_center(stdscr, 'Empty response, would you still like to set a value? (y/n)')
+            emptyResponse = stdscr.getstr().decode("utf-8").lower().strip()
             if emptyResponse == 'y':
-                emptyResponse = input("Set Number: ")
-                change_number_validation(emptyResponse, setter)
+                emptyResponse = stdscr.getstr().decode("utf-8").lower().strip()
+                change_number_validation(stdscr, emptyResponse, setter)
                 break
             elif emptyResponse == 'n':
                 break
             else:
-                print("I'm done with you")
+                print_center(stdscr, "I'm done with you.")
                 break
         else:
             # Attempt to convert input to a float
@@ -159,11 +159,11 @@ def change_number_validation(number, setter):
                 if setter == set_interval:
                     number = number*60         
                 setter(number)
-                print('Setting value...')
+                print_center(stdscr, 'Setting value...')
                 time.sleep(0.5)
                 break
             except ValueError:
-                print('You must input a whole number!\nExiting...')
+                print_center(stdscr, 'You must input a whole number!\nExiting...')
                 time.sleep(0.5)
                 break
 
@@ -178,11 +178,36 @@ def handle_language_refresh_rate_change(refresh):
 
 def print_center(stdscr, text):
     stdscr.clear()
-    h, w = stdscr.getmaxyx()
-    x = w // 2 - len(text) // 2
-    y = h // 2
-    stdscr.addstr(y, x, text)
-    stdscr.refresh()
+    h, w = stdscr.getmaxyx()  # Get the screen height and width
+    
+    # Split text into multiple lines if it exceeds the screen width
+    lines = []
+    while len(text) > w:
+        # Find the last space within the first w characters
+        split_index = text[:w].rfind(" ")
+        if split_index == -1:
+            # If no space found, force split at the screen width
+            split_index = w
+        # Append the split line and update the text
+        lines.append(text[:split_index])
+        text = text[split_index:].strip()  # Trim leading spaces in the next part
+    
+    # Append the remaining text
+    lines.append(text)
+
+    # Calculate vertical starting point to center the block of text
+    y_start = max(0, h // 2 - len(lines) // 2)
+    
+    # Display each line centered on the screen
+    for i, line in enumerate(lines):
+        x = max(0, w // 2 - len(line) // 2)  # Center each line horizontally
+        try:
+            stdscr.addstr(y_start + i, x, line)  # Print each line at the correct position
+        except curses.error:
+            pass  # Handle any errors (e.g., if the window is too small)
+
+    stdscr.refresh()  # Refresh the screen to show the text
+
 
 def handle_commands(stdscr, command_type: Command_Menu):
     handling = True
@@ -200,14 +225,13 @@ def handle_commands(stdscr, command_type: Command_Menu):
         elif command_type == Command_Menu.RAM_USED:
            
             print_center(stdscr, f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n\n")
-            # stdscr.addstr(f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n\n")
             stdscr.refresh()
             response = stdscr.getstr().decode("utf-8").lower().strip()
             if response == 'y':
                 print_center(stdscr,"Right then, select a time in seconds to refresh RAM here: ")
                 stdscr.refresh()
                 number = stdscr.getstr().decode("utf-8").strip()
-                change_number_validation(number, set_refresh_rate)
+                change_number_validation(stdscr, number, set_refresh_rate)
 
         elif command_type == Command_Menu.RAM_WATCHER:
             print_center(stdscr, "Toggling RAM_Watcher\n")
@@ -216,48 +240,35 @@ def handle_commands(stdscr, command_type: Command_Menu):
 
 
         elif command_type == Command_Menu.THRESHOLD:
-            stdscr.addstr(f"What would you like to change the {GREEN}threshold{RESET} ({get_threshold()}) to: ")
+            print_center(stdscr, f"What would you like to change the threshold ({get_threshold()}) to: ")
             stdscr.refresh()
             number = stdscr.getstr().decode("utf-8").strip()
-            change_number_validation(number, set_threshold)
+            change_number_validation(stdscr, number, set_threshold)
 
         elif command_type == Command_Menu.APPLICATION:
-            stdscr.addstr("This doesn't change. You a bitch for thinking I'd put in this much effort\n")
+            print_center(stdscr, "This doesn't change. Your a bitch for thinking I'd put in this much effort\n")
+            time.sleep(2)
             stdscr.refresh()
 
         elif command_type == Command_Menu.NOTIFICATIONS:
-            stdscr.addstr("(Don't see why you would turn this off as it's the whole point of this app but fuck it)\n")
+            print_center(stdscr, "(Don't see why you would turn this off as it's the whole point of this app but fuck it)\n")
             stdscr.refresh()
-            time.sleep(2)
-            stdscr.addstr("Toggling Notification\n")
-            stdscr.refresh()
+            time.sleep(1.5)
+            print_center(stdscr, "Toggling Notification\n")
             set_notification(not get_notification())
 
         elif command_type == Command_Menu.NOTIFICATIONS_TIMER:
-            stdscr.addstr(f"What would you like to change the {GREEN}timer{RESET} ({display_timer(get_interval())}) to (min): ")
+            print_center(stdscr, f"What would you like to change the timer ({display_timer(get_interval())}) to (min): ")
             stdscr.refresh()
             number = stdscr.getstr().decode("utf-8").strip()
-            change_number_validation(number, set_interval)
-
-        elif command == "":
-            stdscr.addstr("That's an empty command sir!\n")
-            handling = True
-
+            change_number_validation(stdscr, number, set_interval)
         else:
-            stdscr.addstr(f"Unknown command: {command}\n")
+            print_center(stdscr, f"Unknown command: {command}\n")
             handling = True
 
         stdscr.refresh()
         time.sleep(0.5)
     
-            
-    # Show main some way curses.wrapper(main)
-
-
-def monitor_threads():
-    monitor_thread = threading.Thread(target=monitor_memory, args=(APPLICATION_NAME,), daemon=True)
-    monitor_thread.start()
-
 # Function to run both threads
 def run_threads():
     

@@ -5,6 +5,7 @@ import threading
 from constants import APPLICATION_NAME
 from datetime import datetime, timedelta
 from constants import RED, RESET
+from queue import Queue
 
 # Store the current memory usage data
 memory_usage_data = {}
@@ -60,7 +61,7 @@ memory_lock = threading.Lock()
 notification_lock = threading.Lock()
 
 # default 10 second refresh
-def monitor_memory(app_name=APPLICATION_NAME):
+def monitor_memory(queue: Queue, app_name=APPLICATION_NAME):
     global memory_usage_data
     last_notification_time = datetime.now() - timedelta(seconds=get_interval())
 
@@ -79,6 +80,8 @@ def monitor_memory(app_name=APPLICATION_NAME):
         # Safely update the global memory_usage_data using a lock
         with memory_lock:
             memory_usage_data[app_name] = round(total_memory)
+            queue.put(memory_usage_data[app_name])
+            
         
         # Check if total memory usage exceeds the threshold
         if get_notification() and (total_memory)> threshold:
