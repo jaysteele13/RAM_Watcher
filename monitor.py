@@ -4,7 +4,7 @@ from plyer import notification
 import threading
 from constants import APPLICATION_NAME
 from datetime import datetime, timedelta
-from constants import RED, RESET
+from constants import GREEN, RESET
 from queue import Queue
 
 # Store the current memory usage data
@@ -98,7 +98,7 @@ def monitor_memory(queue: Queue, app_name=APPLICATION_NAME):
                         timeout=5
                     )
                     last_notification_time = current_time
-                    print(f"{RED}ALERT{RESET}: {app_name} memory usage is above {threshold} MB!")
+                    print(f"{GREEN}ALERT{RESET}: {app_name} memory usage is above {threshold} MB!")
                    
         # Wait for the next check
         time.sleep(get_refresh_rate())
