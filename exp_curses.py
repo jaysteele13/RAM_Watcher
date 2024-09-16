@@ -27,10 +27,15 @@ def print_menu(stdscr, selected_row_idx, menu_options):
 	for idx, row in enumerate(menu_options):
 		x = w//2 - len(row)//2
 		y = h//2 - len(menu_options)//2 + idx
-		if idx == selected_row_idx:
-			stdscr.attron(curses.color_pair(1))
+		# logic for exit coloring
+		if selected_row_idx == len(menu_options)-1 and idx == len(menu_options)-1:
+			stdscr.attron(curses.color_pair(8))
 			stdscr.addstr(y, x, row)
-			stdscr.attroff(curses.color_pair(1))
+			stdscr.attroff(curses.color_pair(8))
+		elif idx == selected_row_idx:
+			stdscr.attron(curses.color_pair(123))
+			stdscr.addstr(y, x, row)
+			stdscr.attroff(curses.color_pair(123))
 		else:
 			stdscr.addstr(y, x, row)
 	stdscr.refresh()
@@ -45,7 +50,7 @@ def main(stdscr):
 	curses.curs_set(0)
 
 	# color scheme for selected row
-	curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+	init_colors()
 
 	# ensures stdstr doesn't block values from being updated
 	stdscr.nodelay(True)
@@ -94,6 +99,6 @@ if __name__ == "__main__":
 	try:
 		curses.wrapper(main)
 	except KeyboardInterrupt:
-		print(f"{RED}Salutations{RESET}")
+		print(f"{GREEN}Salutations{RESET}")
 		sys.exit()
 

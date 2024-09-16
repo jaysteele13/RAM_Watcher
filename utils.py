@@ -9,9 +9,6 @@ from constants import *
 import curses
 import sys
 
-
-
-
 # Variable to hold the process of the currently running script
 current_process = None
 help = False
@@ -67,12 +64,6 @@ def display_timer(interval):
     else: 
         return f"{int(interval/60)} mins"
     
-def periodic_display_screen():
-    while True:
-        # Call display_screen only if the user is not typing
-        if help == False:
-            display_screen(help)  # Refresh display
-        time.sleep(get_refresh_rate())  # Sleep for the refresh rate (e.g., 15 seconds)
 
 def allow_text(allow = True):
     if allow:
@@ -82,37 +73,7 @@ def allow_text(allow = True):
         curses.curs_set(0)
         curses.noecho()
 
-def display_screen(help = False, startup=False):
-        clear_screen()
-        with memory_lock: 
-            homeTitle = "Home"
-            homeLines = [
-                f"RAM Watcher: {returnToggle(get_watcher())}",
-                f"RAM used: {dictToInt(memory_usage_data)} MB",
-                f"Threshold: {get_threshold()} MB",
-                f"Application: {APPLICATION_NAME}",
-                (f"Notifications: {returnToggle(get_notification())}",
-                f"Timer: {display_timer(get_interval())}")
-            ]
 
-            helpTitle = "Help"
-            helpLines = [
-            "RAM Watcher: (o)",
-            "RAM used: (ur a bitch)",
-            "Threshold: (t)",
-            "Application: (a)",
-            ("Notifications: (n)",
-            "Timer: (ns)")
-            ]
-
-            if startup:
-                print_graphic(create_separator(homeTitle, *homeLines))
-            elif help:
-                print(create_separator(helpTitle, *helpLines))
-            else:
-                print(create_separator(homeTitle, *homeLines))
-
-            print(f"{GREEN}SHIFT{RESET} for help / refresh / clear\n{RED}e{RESET} to quit gracefully...")
         
 def is_terminal_focused():
     # Get the current active window handle
@@ -125,30 +86,13 @@ def is_terminal_focused():
     terminal_titles = [b"RAM_Watcher"]
     return any(title in window_title.value for title in terminal_titles)
 
-def handle_shift_event(e):
-    global help
-    global last_shift_event_time
-
-    current_time = time.time()
-    if (current_time - last_shift_event_time) < debounce_interval:
-        # Ignore this event as it is within the debounce interval
-        return
-
-    if is_terminal_focused():
-        help = not help  # Toggle help state
-        display_screen(help)
-        
-
-    # Update the last processed time
-    last_shift_event_time = current_time
-
 
 def change_number_validation(stdscr, number, setter):
     # Check for empty input
 
     while True:
         if number == "":
-            print_center(stdscr, 'Empty response, would you still like to set a value? (y/n): ')
+            print_center(stdscr, 'Empty response, would you still like to set a value? (y/n): ', highlight_phrase="y/n")
             emptyResponse = stdscr.getstr().decode("utf-8").lower().strip()
             if emptyResponse == 'y':
                 emptyResponse = stdscr.getstr().decode("utf-8").lower().strip()
@@ -168,11 +112,11 @@ def change_number_validation(stdscr, number, setter):
                     number = number*60         
                 setter(number)
                 print_center(stdscr, 'Setting value...')
-                time.sleep(0.5)
+                curses.napms(500)
                 break
             except ValueError:
-                print_center(stdscr, 'You must input a whole number!\nExiting...')
-                time.sleep(0.5)
+                print_center(stdscr, 'You must input a whole number! Exiting...', highlight_phrase="whole number", color_pair=8)
+                curses.napms(500)
                 break
 
 
@@ -183,8 +127,8 @@ def handle_language_refresh_rate_change(refresh):
         return f"Modified Refresh Rate is {refresh}, wanna change this again?"
     
 
-
-def print_center(stdscr, text):
+# ammend this so it takes certain text to change colour of
+def print_center(stdscr, text, highlight_phrase=None, color_pair=4):
     stdscr.clear()
     h, w = stdscr.getmaxyx()  # Get the screen height and width
     
@@ -205,15 +149,26 @@ def print_center(stdscr, text):
 
     # Calculate vertical starting point to center the block of text
     y_start = max(0, h // 2 - len(lines) // 2)
-    
+
     # Display each line centered on the screen
     for i, line in enumerate(lines):
         x = max(0, w // 2 - len(line) // 2)  # Center each line horizontally
-        try:
-            stdscr.addstr(y_start + i, x, line)  # Print each line at the correct position
-        except curses.error:
-            pass  # Handle any errors (e.g., if the window is too small)
-
+        
+        if highlight_phrase and highlight_phrase in line:
+            # Find where the highlighted phrase starts in the line
+            start_idx = line.find(highlight_phrase)
+            # Print the text before the phrase
+            stdscr.addstr(y_start + i, x, line[:start_idx])
+            # Print the highlighted phrase in the chosen color
+            stdscr.attron(curses.color_pair(color_pair))
+            stdscr.addstr(line[start_idx:start_idx + len(highlight_phrase)])
+            stdscr.attroff(curses.color_pair(color_pair))
+            # Print the text after the phrase
+            stdscr.addstr(line[start_idx + len(highlight_phrase):])
+        else:
+            # If no highlight, print the whole line as usual
+            stdscr.addstr(y_start + i, x, line)
+        
     stdscr.refresh()  # Refresh the screen to show the text
 
 
@@ -224,16 +179,16 @@ def handle_commands(stdscr, command_type: Command_Menu):
         handling = False
 
         if command_type == Command_Menu.EXIT:
-            print_center(stdscr, f"Exiting the program {GREEN}GRACEFULLY{RESET}.\n")
+            print_center(stdscr, f"Exiting the program GRACEFULLY.\n", highlight_phrase="GRACEFULLY")
             stdscr.refresh()
-            time.sleep(1)
+            curses.napms(1000)
             curses.endwin()  # Ensure curses cleanup
             handling = False
             sys.exit(0)  # Use sys.exit() to terminate properly
 
         elif command_type == Command_Menu.RAM_USED:
            
-            print_center(stdscr, f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n: ")
+            print_center(stdscr, f"{handle_language_refresh_rate_change(get_refresh_rate())} y/n: ", highlight_phrase=str(get_refresh_rate()))
             stdscr.refresh()
             response = stdscr.getstr().decode("utf-8").lower().strip()
             if response == 'y':
@@ -247,32 +202,32 @@ def handle_commands(stdscr, command_type: Command_Menu):
 
         elif command_type == Command_Menu.RAM_WATCHER:
             allow_text(False)
-            print_center(stdscr, "Toggling RAM_Watcher\n")
+            print_center(stdscr, "Toggling RAM_Watcher\n", highlight_phrase="RAM_Watcher")
             stdscr.refresh()
             set_watcher(not get_watcher())
 
         elif command_type == Command_Menu.THRESHOLD:
-            print_center(stdscr, f"What would you like to change the threshold ({get_threshold()}) to: ")
+            print_center(stdscr, f"What would you like to change the threshold ({get_threshold()}) to: ", highlight_phrase=str(get_threshold()))
             stdscr.refresh()
             number = stdscr.getstr().decode("utf-8").strip()
             change_number_validation(stdscr, number, set_threshold)
 
         elif command_type == Command_Menu.APPLICATION:
             allow_text(False)
-            print_center(stdscr, "This doesn't change. Your a bitch for thinking I'd put in this much effort\n")
-            time.sleep(2)
+            print_center(stdscr, "This doesn't change. Your a bitch for thinking I'd put in this much effort\n", highlight_phrase="bitch", color_pair=8)
+            curses.napms(2000)
             stdscr.refresh()
 
         elif command_type == Command_Menu.NOTIFICATIONS:
             allow_text(False)
             print_center(stdscr, "(Don't see why you would turn this off as it's the whole point of this app but fuck it)\n")
             stdscr.refresh()
-            time.sleep(1.5)
-            print_center(stdscr, "Toggling Notification\n")
+            curses.napms(1000)
+            print_center(stdscr, "Toggling Notification\n", highlight_phrase="Notification")
             set_notification(not get_notification())
 
         elif command_type == Command_Menu.NOTIFICATIONS_TIMER:
-            print_center(stdscr, f"What would you like to change the timer ({display_timer(get_interval())}) to (min): ")
+            print_center(stdscr, f"What would you like to change the timer ({display_timer(get_interval())}) to (min): ", highlight_phrase=str(display_timer(get_interval())))
             stdscr.refresh()
             number = stdscr.getstr().decode("utf-8").strip()
             change_number_validation(stdscr, number, set_interval)
@@ -281,25 +236,8 @@ def handle_commands(stdscr, command_type: Command_Menu):
             handling = True
 
         stdscr.refresh()
-        time.sleep(0.5)
-    
-# Function to run both threads
-def run_threads():
-    
-     # Start listening for shift key event
-    keyboard.on_press_key("shift", handle_shift_event)
+        curses.napms(500)
 
-    # command threads
-    command_thread = threading.Thread(target=handle_commands, daemon=True)
-    command_thread.start()
-
-    # Keep the main thread alive
-    command_thread.join()
-    # monitor_thread.join()
-
-def refresh_threads():
-    display_thread = threading.Thread(target=periodic_display_screen, daemon=True)
-    display_thread.start()
      
 def startup():
     # On start up do this
@@ -310,7 +248,6 @@ def startup():
     print_graphic(graphic)
     time.sleep(1)
     clear_screen()
-    display_screen(False, True)
 
 
 
