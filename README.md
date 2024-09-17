@@ -29,15 +29,10 @@ Just uses terminal functions to use as little RAM, GRAM and CPU porcessing
 power and Storage. This is a simple terminal interface, primarily just used
 for Alerting when an applications memory goes over your set threshold.
 
-# Screenshots
-
 
 - RAM_Watcher_V2
 Takes everything V1 has to offer and uses `Curses` A terminal GUI to amplify
 the visuals of the application. V2 was more for my enjoyment to mess around on.
 That to say it only takes up 10mb more RAM than V1, for better visuals.
-
-# Screenshots
-
 
 ```
