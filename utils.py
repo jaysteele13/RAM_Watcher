@@ -172,7 +172,7 @@ def print_center(stdscr, text, highlight_phrase=None, color_pair=4):
     stdscr.refresh()  # Refresh the screen to show the text
 
 
-def handle_commands(stdscr, command_type: Command_Menu):
+def handle_commands(stdscr, command_type: Command_Menu, queue):
     handling = True
     while handling:
         allow_text()
