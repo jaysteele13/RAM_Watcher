@@ -1,5 +1,3 @@
-import keyboard
-import threading
 import os
 import re
 from art import *
@@ -8,14 +6,13 @@ import ctypes
 from constants import *
 import curses
 import sys
+from exp_save_var import *
 
 # Variable to hold the process of the currently running script
 current_process = None
 help = False
 # Initialize memory variable
 memory = None
-# Define timeout duration in seconds
-timeout_duration = 1200
 refresh_rate = 15
 
 # STOP DEBOUNCING for FLAG
@@ -23,11 +20,22 @@ last_shift_event_time = 0
 debounce_interval = 0.5  # 500 milliseconds
 def set_default_values():
     # Defaults (dk if these are necessary)
-    set_refresh_rate(1)
-    set_threshold(1250)
-    set_interval(600) # 10 mins default
-    set_watcher(True)
-    set_notification(True)
+    load_config()
+    set_refresh_rate(get_config_value(Command_Menu.RAM_USED))
+    set_threshold(get_config_value(Command_Menu.THRESHOLD))
+    set_interval(get_config_value(Command_Menu.NOTIFICATIONS_TIMER)) # 10 mins default
+    set_watcher(get_config_value(Command_Menu.RAM_WATCHER))
+    set_notification(get_config_value(Command_Menu.NOTIFICATIONS))
+
+
+# on exit set config values
+
+def set_config_values():
+    set_config_value(Command_Menu.RAM_USED, get_refresh_rate())
+    set_config_value(Command_Menu.THRESHOLD, get_threshold())
+    set_config_value(Command_Menu.NOTIFICATIONS_TIMER, get_interval())
+    set_config_value(Command_Menu.RAM_WATCHER, get_watcher())
+    set_config_value(Command_Menu.NOTIFICATIONS, get_notification())
 
 
 #instead have a function that just maps this
@@ -48,7 +56,7 @@ def dictToInt(memory):
         return float(match.group())
         # " decimal places"
     else:
-        return "Retrieving RAM"
+        return "RAM_Watcher Disabled"
 
 def returnToggle(toggle):
     return "On" if toggle else "Off"
@@ -179,12 +187,20 @@ def handle_commands(stdscr, command_type: Command_Menu, queue):
         handling = False
 
         if command_type == Command_Menu.EXIT:
+            allow_text(False)
             print_center(stdscr, f"Exiting the program GRACEFULLY.\n", highlight_phrase="GRACEFULLY")
             stdscr.refresh()
             curses.napms(1000)
-            curses.endwin()  # Ensure curses cleanup
-            handling = False
-            sys.exit(0)  # Use sys.exit() to terminate properly
+
+            try:
+                set_config_values()
+            except Exception as e:
+                print_center(stdscr, f"Error while saving config values: {e}", highlight_phrase="Error", color_pair=8)
+            finally:
+                curses.endwin()  # Cleanup curses interface
+                handling = False
+                os._exit(0)  
+
 
         elif command_type == Command_Menu.RAM_USED:
            

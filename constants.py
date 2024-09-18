@@ -26,3 +26,4 @@ def init_colors():
     curses.init_pair(123, curses.COLOR_BLACK, curses.COLOR_WHITE)
     curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(8, curses.COLOR_WHITE, curses.COLOR_RED)
+
