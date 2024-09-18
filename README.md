@@ -26,12 +26,12 @@ cd RAM_Watcher
 
 OR
 
-Download the `RAM_Watcher_V2.exe` in `dist`. 
-
 ## 🎩 Performance -> too be decided
-previous version:
-Application takes up **40** mb of RAM. `Windows Terminal` takes up around **25** mb by default. `RAM_Watcher_V1` takes up **15** mb.
-![image](https://github.com/user-attachments/assets/f277c255-c98d-4669-9c7d-dbd38b9d62ed)
-![image](https://github.com/user-attachments/assets/9c24fbfa-6dba-476b-89a3-b7bbb9f2a232)
 
-## 📸 Screenshots
+- RAM_Watcher_V2
+Takes everything V1 has to offer and uses `Curses` A terminal GUI to amplify
+the visuals of the application. V2 was more for my enjoyment to mess around on.
+That to say it only takes up 10mb more RAM than V1, for better visuals.
+
+```
+

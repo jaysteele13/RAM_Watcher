@@ -95,12 +95,13 @@ def main(stdscr):
         elif key == curses.KEY_ENTER or key in [10, 13]:
             # here we will handle the commands
             # if user selected last row, exit the program
-            if current_row == len(update_menu())-1:
-                break
-
             # this is broke -> fix please x
             handle_commands(stdscr, map_row_to_command(current_row), queue)
             # stdscr.getch()
+            if current_row == len(update_menu())-1:
+                break
+
+            
 
         try:
             # Check if there's new data in the queue
@@ -114,11 +115,11 @@ def main(stdscr):
 
 
 if __name__ == "__main__":
-
-    set_default_values()   # Fixed indentation
-
     try:
+        # set monitoring defaults
+        set_default_values()
         curses.wrapper(main)
     except KeyboardInterrupt:
         print(f"{GREEN}Salutations{RESET}")
+        set_config_values()
         sys.exit()
