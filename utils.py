@@ -190,7 +190,7 @@ def handle_commands(stdscr, command_type: Command_Menu, queue):
             allow_text(False)
             print_center(stdscr, f"Exiting the program GRACEFULLY.\n", highlight_phrase="GRACEFULLY")
             stdscr.refresh()
-            curses.napms(1000)
+            curses.napms(500)
 
             try:
                 set_config_values()

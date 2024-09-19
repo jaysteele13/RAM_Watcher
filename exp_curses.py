@@ -50,7 +50,7 @@ def monitor_setter(queue):
             if monitoring_thread is None or not monitoring_thread.is_alive():
                 # have this outside while if this fails in the future
                 monitoring_thread = threading.Thread(
-                    target=monitor_memory, args=(queue,), daemon=True)
+                    target=monitor_memory_and_storage, args=(queue,), daemon=True)
                 monitoring_thread.start()
 
             # Avoid CPU overuse by sleeping for a bit between checks
